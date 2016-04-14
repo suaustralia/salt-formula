@@ -18,6 +18,8 @@ salt:
   salt_api: salt-api
   salt_ssh: salt-ssh
 
+  hash_type: sha256
+
   python_git: python-git
 
   master:
