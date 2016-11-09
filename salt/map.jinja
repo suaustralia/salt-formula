@@ -10,7 +10,7 @@ that differ from whats in defaults.yaml
 ##}
 {% set os_family_map = salt['grains.filter_by']({
     'Debian':  {
-      'pkgrepo': 'deb http://debian.saltstack.com/debian ' + salt['grains.get']('oscodename') + '-saltstack main',
+      'pkgrepo': 'deb https://debian.saltstack.com/debian ' + salt['grains.get']('oscodename') + '-saltstack main',
       'key_url': 'salt://salt/pkgrepo/debian/saltstack.gpg',
       'libgit2': 'libgit2-22',
       'gitfs': {
