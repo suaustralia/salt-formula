@@ -38,7 +38,7 @@ that differ from whats in defaults.yaml
 {% set osrelease = salt['grains.get']('osrelease') %}
 {% set os_family_map = salt['grains.filter_by']({
     'Debian':  {
-      'pkgrepo': 'deb http://repo.saltstack.com/apt/' +
+      'pkgrepo': 'deb https://repo.saltstack.com/apt/' +
       salt['grains.get']('os')|lower + '/' + salt['grains.get']('osmajorrelease', osrelease) + '/amd64/latest ' + salt['grains.get']('oscodename') + ' main',
       'key_url': 'https://repo.saltstack.com/apt/' + salt['grains.get']('os')|lower + '/' + salt['grains.get']('osmajorrelease', osrelease) + '/amd64/latest/SALTSTACK-GPG-KEY.pub',
       'libgit2': 'libgit2-22',
@@ -122,7 +122,7 @@ that differ from whats in defaults.yaml
     },
   }, merge=salt['grains.filter_by']({
     'Ubuntu':  {
-      'pkgrepo': 'deb http://repo.saltstack.com/apt/' +
+      'pkgrepo': 'deb https://repo.saltstack.com/apt/' +
       salt['grains.get']('os')|lower + '/' + osrelease + '/amd64/latest ' + salt['grains.get']('oscodename') + ' main',
       'key_url': 'https://repo.saltstack.com/apt/' + salt['grains.get']('os')|lower + '/' + osrelease + '/amd64/latest/SALTSTACK-GPG-KEY.pub',
       'pygit2': 'python-pygit2',
@@ -137,7 +137,7 @@ that differ from whats in defaults.yaml
       },
     },
     'Raspbian': {
-      'pkgrepo': 'deb http://repo.saltstack.com/apt/' +
+      'pkgrepo': 'deb https://repo.saltstack.com/apt/' +
       salt['grains.get']('os_family')|lower + '/' + salt['grains.get']('osmajorrelease', osrelease) + '/armhf/latest ' + salt['grains.get']('oscodename') + ' main',
       'key_url': 'https://repo.saltstack.com/apt/' + salt['grains.get']('os_family')|lower + '/' + salt['grains.get']('osmajorrelease', osrelease) + '/armhf/latest/SALTSTACK-GPG-KEY.pub',
     },
