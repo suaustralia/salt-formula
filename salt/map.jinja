@@ -57,7 +57,10 @@ that differ from whats in defaults.yaml
       },
     },
     'RedHat':  {
-      'pygit2': 'python-pygit2',
+      'pygit2': salt['grains.filter_by']({
+        'Fedora': 'python2-pygit2',
+        'default': 'python-pygit2',
+      }, grain='os'),
       'python_git': 'GitPython',
       'gitfs': {
         'pygit2': {
@@ -87,6 +90,18 @@ that differ from whats in defaults.yaml
       'salt_cloud':  'salt',
       'salt_api': 'salt',
       'salt_ssh':  'salt',
+      'pygit2': 'python2-pygit2',
+      'libgit2': 'libgit2',
+    },
+    'Alpine': {
+      'salt_master': 'salt-master',
+      'salt_minion': 'salt-minion',
+      'salt_syndic': 'salt-syndic',
+      'salt_cloud': 'salt-cloud',
+      'salt_api': 'salt-api',
+      'salt_ssh': 'salt-ssh',
+      'pygit2': 'py2-pygit2',
+      'libgit2': 'libgit2',
     },
     'FreeBSD': {
       'salt_master': 'py27-salt',
