@@ -14,19 +14,33 @@ salt:
   # install Salt via git/pip/etc.)
   install_packages: True
 
+  # Optional: set salt version (if install_packages is set to True)
+  version: 2017.7.2-1.el7
+
   # to overwrite map.jinja salt packages
   lookup:
-    salt-master: 'salt-master'
-    salt-minion: 'salt-minion'
-    salt-syndic: 'salt-syndic'
-    salt-cloud: 'salt-cloud'
-    salt-ssh: 'salt-ssh'
+    salt_master: 'salt-master'
+    salt_minion: 'salt-minion'
+    salt_syndic: 'salt-syndic'
+    salt_cloud: 'salt-cloud'
+    salt_ssh: 'salt-ssh'
+    pyinotify: 'python-pyinotify' the package to be installed for pyinotify
 
   # Set which release of SaltStack to use, default to 'latest'
   # To get the available releases:
   # * http://repo.saltstack.com/yum/redhat/7/x86_64/
   # * http://repo.saltstack.com/apt/debian/8/amd64/
-  release: 2016.11
+  release: "2016.11"
+  
+  # MacOS has no package management. 
+  # Instead, we use file.managed to download an appropriate .pkg file and macpackage.installed to install it
+  # 'version', if set (see above), will be used to check the .pkg version to determine if it should be installed
+  #
+  # NOTE: if 'version' is not set version comparison will not occur and the .pkg WILL NOT be installed if a salt
+  # .pkg is already installed
+  # NOTE: salt_minion_pkg_hash, if set, will be passed into file.managed's source_hash, use URL or hash string
+  salt_minion_pkg_source: 'https://repo.saltstack.com/osx/salt-2017.7.4-py3-x86_64.pkg'
+  salt_minion_pkg_hash: 'https://repo.saltstack.com/osx/salt-2017.7.4-py3-x86_64.pkg.md5'
 
   # salt master config
   master:
@@ -87,26 +101,26 @@ salt:
 
     # optional engine configuration
     engines:
-      slack:
-        token: xoxp-XXXXX-XXXXXXX
-        control: True
-        valid_users:
-          - someuser
-          - otheruser
-        valid_commands:
-          - test.ping
-          - list_jobs
-        aliases:
-          list_jobs:
-            type: runner
-            cmd: jobs.list_jobs
+      - slack:
+          token: xoxp-XXXXX-XXXXXXX   # use Slack's legacy API token
+          control: True
+          valid_users:
+            - someuser
+            - otheruser
+          valid_commands:
+            - test.ping
+            - list_jobs
+          aliases:
+            list_jobs:
+              type: runner
+              cmd: jobs.list_jobs
 
     # optional: these reactors will be configured on the master
     # They override reactors configured in
     # 'salt:reactors' or the old 'salt:reactor' parameters
     reactors:
       - 'master/deploy':
-      - /srv/salt/reactors/deploy.sls
+        - /srv/salt/reactors/deploy.sls
 
   # salt minion config:
   minion:
@@ -150,25 +164,32 @@ salt:
     mine_functions:
       network.interface_ip: [eth0]
 
+    # Define a minion scheduler
+    schedule:
+      - highstate:
+        - function: state.apply
+        - minutes: 60
+        - returner: redis
+
     # other 'non-default' config
     auth_keytab: /root/auth.keytab
     auth_principal: kadmin/admin
 
     # optional engine configuration
     engines:
-      slack:
-        token: xoxp-XXXXX-XXXXXXX
-        control: True
-        valid_users:
-          - someuser
-          - otheruser
-        valid_commands:
-          - test.ping
-          - list_jobs
-        aliases:
-          list_jobs:
-            type: runner
-            cmd: jobs.list_jobs
+      - slack:
+          token: xoxp-XXXXX-XXXXXXX   # use Slack's legacy API token
+          control: True
+          valid_users:
+            - someuser
+            - otheruser
+          valid_commands:
+            - test.ping
+            - list_jobs
+          aliases:
+            list_jobs:
+              type: runner
+              cmd: jobs.list_jobs
 
     # optional beacons configuration
     beacons:
@@ -189,7 +210,25 @@ salt:
     # 'salt:reactors' or the old 'salt:reactor' parameters
     reactors:
       - 'minion/deploy':
-      - /srv/salt/reactors/deploy.sls
+        - /srv/salt/reactors/deploy.sls
+
+    # Optional: Configure an elasticsearch returner
+    return: elasticsearch
+    elasticsearch:
+      hosts:
+        - example.elasticsearch.host:9200
+        - example.elasticsearch.host2:9200
+      index_date: True
+      index: salt
+      number_of_shards: 5
+      number_of_replicas: 2
+      debug_returner_payload: True
+      states_count: True
+      states_order_output: True
+      states_single_index: True
+      functions_blacklist:
+        - test.ping
+        - saltutil.find_job
 
   # salt cloud config
   cloud:
@@ -321,3 +360,4 @@ salt_formulas:
       - salt-formula
       - postfix-formula
       - openssh-formula
+
