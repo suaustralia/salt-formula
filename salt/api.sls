@@ -11,9 +11,13 @@ salt-api:
     - version: {{ salt_settings.version }}
   {%- endif %}
 {% endif %}
-  service.running:
-    - enable: True
+{% if salt_settings.api_service_details.state != 'ignore' %}
+  service.{{ salt_settings.api_service_details.state }}:
+    - enable: {{ salt_settings.api_service_details.enabled }}
     - name: {{ salt_settings.api_service }}
+    {%- if grains.os_family == 'FreeBSD' %}
+    - retry: {{ salt_settings.retry_options | json }}
+    {%- endif %}
     - require:
       - service: {{ salt_settings.master_service }}
     - watch:
@@ -21,3 +25,4 @@ salt-api:
       - pkg: salt-api
 {% endif %}
       - file: salt-master
+{% endif %}

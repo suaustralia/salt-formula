@@ -3,6 +3,7 @@
 ---
 salt:
   version: ''
+  pin_version: false
   py_ver: ''   ## py2 is default
   rootuser: root
   rootgroup: root
@@ -10,6 +11,7 @@ salt:
   use_pip: false
   clean_config_d_dir: true
   restart_via_at: false
+  parallel: true   # salt.git module argument
 
   config_path: /etc/salt
 
@@ -19,12 +21,29 @@ salt:
   master_config_use_TOFS: false
 
   minion_service: salt-minion
+  minion_service_details:
+    # special name 'ignore' will not output anything about the service
+    state: running
+    enabled: true
+
   master_service: salt-master
+  master_service_details:
+    # special name 'ignore' will not output anything about the service
+    state: running
+    enabled: true
+
   api_service: salt-api
+  api_service_details:
+    # special name 'ignore' will not output anything about the service
+    state: running
+    enabled: true
+
   syndic_service: salt-syndic
 
   salt_master: salt-master
   salt_minion: salt-minion
+  salt_master_macos_plist_hash: ''
+  salt_minion_macos_plist_hash: ''
   salt_syndic: salt-syndic
   salt_cloud: salt-cloud
   salt_api: salt-api
@@ -41,7 +60,7 @@ salt:
   master:
     gitfs_provider: gitpython
   minion:
-    master_type: true  # see init.sls & standalone.sls
+    master_type: str  # see init.sls & standalone.sls
 
   gitfs:
     dulwich:
@@ -67,6 +86,13 @@ salt:
       providers: salt://salt/files/cloud.providers.d
       profiles: salt://salt/files/cloud.profiles.d
       maps: salt://salt/files/cloud.maps.d
+
+  # https://docs.saltstack.com/en/latest/ref/states/requisites.html#retrying-states
+  retry_options:
+    attempts: 2
+    until: true
+    interval: 10
+    splay: 10
 
 salt_formulas:
   list: {}     # via pillar data

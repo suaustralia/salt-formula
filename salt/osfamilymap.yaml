@@ -4,11 +4,7 @@
 
 {%- set py_ver_repr = salt['pillar.get']('salt:py_ver', '') %}
 
-{%- set osrelease = salt['grains.get']('osrelease') %}
-{#- Workaround for OpenSuse Leap 15.1 until the repo is available #}
-{%- if [grains.os_family, osrelease] == ['Suse', '15.1'] %}
-{%-   set osrelease = '15.0' %}
-{%- endif %}
+{%- set osrelease = salt['grains.get']('osrelease', '') %}
 {%- set salt_release = salt['pillar.get']('salt:release', 'latest') %}
 {%- if salt_release.split('.')|length >= 3 %}
 {%-   set salt_release = 'archive/' ~ salt_release %}
@@ -16,16 +12,22 @@
 {%- set osfamily_lower =  salt['grains.get']('os_family')|lower %}
 {%- set osmajorrelease = salt['grains.get']('osmajorrelease', osrelease)|string %}
 {%- set oscodename = salt['grains.get']('oscodename') %}
+{%- set opensuse_repo_suffix = 'Leap_' ~ osrelease if salt['grains.get']('osfinger', '') == 'Leap-15' else 'Tumbleweed' %}
+{%- set salt_repo = salt['pillar.get']('salt:repo', 'https://repo.saltproject.io') %}
 
 #from template-formula
-{%- if grains.os == 'MacOS' %}
-{%-   set macos_rootuser = salt['cmd.run']("stat -f '%Su' /dev/console") %}
-{%-   set macos_rootgroup = salt['cmd.run']("stat -f '%Sg' /dev/console") %}
+{%- if grains.os_family == 'MacOS' %}
+{%-   set rootuser = salt['cmd.run']("stat -f '%Su' /dev/console") %}
+{%-   set rootgroup = salt['cmd.run']("stat -f '%Sg' /dev/console") %}
+{%- elif grains.os_family == 'Windows' %}
+{%-   set rootuser = salt['cmd.run']("whoami").split("\\")[1] %}
 {%- endif %}
 
+
 Debian:
-  pkgrepo: 'deb https://repo.saltstack.com/{{ py_ver_repr or 'apt' }}/{{ osfamily_lower }}/{{ osmajorrelease }}/amd64/{{ salt_release }} {{ oscodename }} main'
-  key_url: 'https://repo.saltstack.com/{{ py_ver_repr or 'apt' }}/{{ osfamily_lower }}/{{ osmajorrelease }}/amd64/{{ salt_release }}/SALTSTACK-GPG-KEY.pub'
+  pkgrepo: 'deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=amd64] {{ salt_repo }}/{{ py_ver_repr or 'py3' }}/{{ osfamily_lower }}/{{ osmajorrelease }}/amd64/{{ salt_release }} {{ oscodename }} main'
+  pkgrepo_keyring: '{{ salt_repo }}/{{ py_ver_repr or 'py3' }}/{{ osfamily_lower }}/{{ osmajorrelease }}/amd64/{{ salt_release }}/salt-archive-keyring.gpg'
+  pkgrepo_keyring_hash: sha256=ea38e0cdbd8dc53e1af154a8d711a2a321a69f81188062dc5cde9d54df2b8c47
   libgit2: libgit2-22
   pyinotify: python-pyinotify
   gitfs:
@@ -41,8 +43,8 @@ Debian:
 RedHat:
   pkgrepo_name: saltstack
   pkgrepo_humanname: SaltStack repo for RHEL/CentOS $releasever
-  pkgrepo: 'https://repo.saltstack.com/{{ py_ver_repr or 'yum' }}/redhat/$releasever/$basearch/{{ salt_release }}'
-  key_url: 'https://repo.saltstack.com/{{ py_ver_repr or 'yum' }}/redhat/$releasever/$basearch/{{ salt_release }}/SALTSTACK-GPG-KEY.pub'
+  pkgrepo: '{{ salt_repo }}/{{ py_ver_repr or 'yum' }}/redhat/$releasever/$basearch/{{ salt_release }}'
+  key_url: '{{ salt_repo }}/{{ py_ver_repr or 'yum' }}/redhat/$releasever/$basearch/{{ salt_release }}/SALTSTACK-GPG-KEY.pub'
   pygit2: python-pygit2
   python_git: GitPython
   gitfs:
@@ -57,9 +59,9 @@ RedHat:
     gitfs_provider: pygit2
 
 Suse:
-  pkgrepo_humanname: 'Salt releases for SLE-based SUSE products (openSUSE_Leap_{{ osrelease }})'
-  pkgrepo: 'http://repo.saltstack.com/opensuse/openSUSE_Leap_{{ osrelease }}/'
-  key_url: 'http://repo.saltstack.com/opensuse/openSUSE_Leap_{{ osrelease }}/repodata/repomd.xml.key'
+  pkgrepo_humanname: 'Salt releases for SLE-based SUSE products (openSUSE_{{ opensuse_repo_suffix }})'
+  pkgrepo: 'https://download.opensuse.org/repositories/systemsmanagement:/saltstack/openSUSE_{{ opensuse_repo_suffix }}/'
+  key_url: 'https://download.opensuse.org/repositories/systemsmanagement:/saltstack/openSUSE_{{ opensuse_repo_suffix }}/repodata/repomd.xml.key'
   pygit2: python-pygit2
   pyinotify: python-pyinotify
   gitfs:
@@ -130,9 +132,10 @@ OpenBSD:
   python_git: py-GitPython
 
 Windows:
-  salt_minion: salt-minion{{ py_ver_repr or '-py3' }}
+  salt_minion: salt-minion{{ '-' ~ py_ver_repr if py_ver_repr else '' }}
   config_path: 'C:\salt\conf'
   minion_service: salt-minion
+  rootuser: {{ rootuser | d('') }}
 
 MacOS:
   salt_minion: salt
@@ -141,5 +144,5 @@ MacOS:
   config_path: /private/etc/salt
   minion_service: com.saltstack.salt.minion
   ## from template-formula
-  rootuser: {{ macos_rootuser | d('') }}
-  rootgroup: {{ macos_rootgroup | d('') }}
+  rootuser: {{ rootuser | d('') }}
+  rootgroup: {{ rootgroup | d('') }}
