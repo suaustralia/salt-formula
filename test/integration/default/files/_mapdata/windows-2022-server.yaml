@@ -1,12 +1,12 @@
 # yamllint disable rule:indentation rule:line-length
-# Gentoo-2
+# Windows-2022Server
 ---
 values:
   formulas_settings:
     checkout_orig_branch: false
     git_opts:
       default:
-        basedir: /srv/formulas
+        basedir: "/srv/formulas"
         baseurl: https://github.com/saltstack-formulas
         options:
           output_loglevel: quiet
@@ -24,7 +24,7 @@ values:
         maps: salt://salt/files/cloud.maps.d
         profiles: salt://salt/files/cloud.profiles.d
         providers: salt://salt/files/cloud.providers.d
-    config_path: /etc/salt
+    config_path: C:\salt\conf
     gitfs:
       dulwich:
         install_from_source: true
@@ -36,7 +36,7 @@ values:
           require_state: false
         install_from_source: true
         libgit2:
-          build_parent_dir: /usr/src/
+          build_parent_dir: "/usr/src/"
           download_hash: 683d1164e361e2a0a8d52652840e2340
           install_from_source: true
           version: 0.23.0
@@ -51,16 +51,16 @@ values:
       - reclass:
           inventory_base_uri: /etc/reclass
       - saltclass:
-        - path: /srv/saltclass
+        - path: "/srv/saltclass"
       file_roots:
         base:
-        - /srv/salt
+        - "/srv/salt"
       fileserver_backend:
       - rootfs
       gitfs_provider: gitpython
       pillar_roots:
         base:
-        - /srv/pillar
+        - "/srv/pillar"
     master_config_use_TOFS: false
     master_remove_config: false
     master_service: salt-master
@@ -70,25 +70,24 @@ values:
     minion:
       file_roots:
         base:
-        - /srv/salt
+        - "/srv/salt"
       fileserver_backend:
       - rootfs
       master: localhost
       master_type: str
       pillar_roots:
         base:
-        - /srv/pillar
+        - "/srv/pillar"
     minion_config_use_TOFS: false
     minion_remove_config: false
     minion_service: salt-minion
     minion_service_details:
       enabled: true
       state: running
-    parallel: true
+    parallel: false
     pin_version: false
     pkgrepo: ''
     py_ver: py3
-    pyinotify: dev-python/pyinotify
     python_dulwich: python-dulwich
     python_git: python-git
     release: '3004'
@@ -99,15 +98,15 @@ values:
       splay: 10
       until: true
     rootgroup: root
-    rootuser: root
-    salt_api: app-admin/salt
-    salt_cloud: app-admin/salt
-    salt_master: app-admin/salt
+    rootuser: kitchen
+    salt_api: salt-api
+    salt_cloud: salt-cloud
+    salt_master: salt-master
     salt_master_macos_plist_hash: ''
-    salt_minion: app-admin/salt
+    salt_minion: salt-minion-py3
     salt_minion_macos_plist_hash: ''
     salt_ssh: salt-ssh
-    salt_syndic: app-admin/salt
+    salt_syndic: salt-syndic
     ssh_roster: {}
     syndic_service: salt-syndic
     use_pip: false
