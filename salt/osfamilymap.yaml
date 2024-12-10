@@ -4,14 +4,7 @@
 
 {%- set py_ver_repr = salt['pillar.get']('salt:py_ver', '') %}
 
-{%- set repoarch = salt['grains.get']('osarch') %}
 {%- set osrelease = salt['grains.get']('osrelease', '') %}
-{%- set salt_release_major = salt_release.split('.') | map('int') | list | first %}
-{%- if salt_release != "latest" %}
-{%-   set onedir = salt['pillar.get']('salt:onedir', True) if (salt_release_major >= 3005) and (salt_release != "archive/") else False %}
-{%- else %}
-{%-   set onedir = True %}
-{%- endif %}
 {%- set opensuse_repo_suffix = 'Leap_' ~ osrelease if salt['grains.get']('osfinger', '') == 'Leap-15' else 'Tumbleweed' %}
 {%- set salt_repo = salt['pillar.get']('salt:repo', 'https://packages.broadcom.com/artifactory') %}
 {%- set salt_repo_key_url = salt['pillar.get']('salt:repo_key_url', salt_repo ~ '/api/security/keypair/SaltProjectKey/public') %}
